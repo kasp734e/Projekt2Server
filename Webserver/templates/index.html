@@ -2,6 +2,26 @@
 <html>
 <head>
     <title>Solcelle Projekt</title>
+    <style>
+        .update-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: rgba(75, 192, 192, 1);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .update-button:hover {
+            background-color: rgba(60, 160, 160, 1);
+        }
+    </style>
 </head>
 <body>
     <h1>Solcelle UI</h1>
@@ -28,15 +48,52 @@
         </div>
     </div>
 
+    <button class="update-button" onclick="updateArduinoData()">Update Charts</button>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const powerDataFromServer = JSON.parse('{{ power_data|tojson}}');
 
-        const mockData = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        function generateHourLabels() {
+            const labels = [];
+            for (let i = 0; i < 24; i++) {
+                labels.push(`${i.toString().padStart(2, '0')}:00`);
+            }
+            return labels;
+        }
+
+        function generateRollingLabels() {
+            const labels = [];
+            // Makes 24 points over 4 hours. One for every tenth minute
+            for (let i = 0; i < 24; i++) {
+                const minutes = (23 - i) * 10;  
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                
+                if (i === 23) {
+                    labels.push("now");  
+                } else if (hours === 0) {
+                    labels.push(`-${mins}m`);  
+                } else if (mins === 0) {
+                    labels.push(`-${hours}h`);  
+                } else {
+                    labels.push(`-${hours}h${mins}m`); 
+                }
+            }
+            return labels;  
+        }
+
+        // Initialize with 24 zeros and the appropriate labels
+        const hourLabels = generateHourLabels();
+        const rollingLabels = generateRollingLabels();
+        const initialData = Array(24).fill(0);
+        
+        // Create the datasets with appropriate labels
+        const STDData = {
+            labels: rollingLabels,  // Use rolling labels for sensor data
             datasets: [{
-                label: 'Mock Data',
-                data: [65, 59, 80, 81, 56, 55, 40],
+                label: 'Data',
+                data: initialData.slice(),
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -44,43 +101,149 @@
         };
 
         const powerData = {
-            labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'],
-            
+            labels: hourLabels,  // Use hour labels for power price
             datasets: [{
-            label: 'Strømpris',
-            data: powerDataFromServer,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            stepped: 'before',
-            pointStyle: false
+                label: 'Strømpris',
+                data: initialData.slice(),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                stepped: 'before',
+                pointStyle: false
             }]
-        }
-
-        const mockConfig = {
-            type: 'line',
-            data: mockData,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
         };
 
-        const graphs = ['graphPower', 'graphUV', 'graphAirQuality', 'graphPowerPrice', 'graphTemp'];
-        const datasets = [mockData, mockData, mockData, powerData, mockData];
+        const charts = {};
 
-        graphs.forEach((graph, index) => {
-            new Chart(
-            document.getElementById(graph),
-            {
-                ...mockConfig,
-                data: datasets[index]
-            }
-            );
-        });
+        function initCharts() {
+            const graphs = ['graphPower', 'graphUV', 'graphAirQuality', 'graphPowerPrice', 'graphTemp'];
+            
+            // Create separate data objects for each chart
+            const datasets = [
+                createChartData(rollingLabels, initialData.slice()),  // Power
+                createChartData(rollingLabels, initialData.slice()),  // UV
+                createChartData(rollingLabels, initialData.slice()),  // Air Quality
+                powerData,                                           // Power Price (already separate)
+                createChartData(rollingLabels, initialData.slice())   // Temperature
+            ];
+            
+            const configs = [
+                {
+                    type: 'line',
+                    options: {
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { title: { display: true, text: 'Strøm Data' } }
+                    }
+                },
+                {
+                    type: 'bar',  // Different chart type for UV
+                    options: {
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { title: { display: true, text: 'UV Intensitet' } }
+                    }
+                },
+                {
+                    type: 'line',
+                    options: {
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { title: { display: true, text: 'Luftkvalitet' } }
+                    }
+                },
+                {
+                    type: 'bar',  // Different chart type for power price
+                    options: {
+                        scales: { 
+                            y: { 
+                                beginAtZero: true,
+                                title: { display: true, text: 'DKK/kWh' }
+                            }
+                        },
+                        plugins: { title: { display: true, text: 'Strømpris' } }
+                    }
+                },
+                {
+                    type: 'line',
+                    options: {
+                        scales: { 
+                            y: { 
+                                beginAtZero: false,
+                                title: { display: true, text: '°C' } 
+                            }
+                        },
+                        plugins: { title: { display: true, text: 'Temperatur' } }
+                    }
+                }
+            ];
+
+            graphs.forEach((graph, index) => {
+                charts[graph] = new Chart(
+                    document.getElementById(graph),
+                    {
+                        type: configs[index].type || 'line',
+                        data: datasets[index],
+                        options: configs[index].options
+                    }
+                );
+            });
+        }
+
+        // Helper function to create a new data object
+        function createChartData(labels, data) {
+            return {
+                labels: labels,
+                datasets: [{
+                    label: 'Data',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+        }
+
+        initCharts();
+
+        function updateArduinoData() {
+            fetch('/api/update')
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Data updated:", data);
+                    // Now get the new data and update the charts
+                    updateCharts();
+                })
+                .catch(error => console.error('Error updating data:', error));
+        }
+
+        function updateCharts() {
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    function updateRollingSensorData(chartObject, newValue) {
+                        const currentData = chartObject.data.datasets[0].data;
+                        // Remove first element and add new value at the end
+                        currentData.shift();
+                        currentData.push(newValue);
+                        chartObject.update();
+                    }
+                    
+                    function updatePowerPrice(chartObject, powerPriceValue) {
+                        chartObject.data.datasets[0].data = powerPriceValue;
+                        chartObject.update();
+                    }
+
+                    // Update power price chart (non-rolling)
+                    updatePowerPrice(charts['graphPowerPrice'], data.powerPrice);
+                    
+                    // Update all sensor charts (rolling)
+                    updateRollingSensorData(charts['graphUV'], data.uv);
+                    updateRollingSensorData(charts['graphAirQuality'], data.airQuality);
+                    updateRollingSensorData(charts['graphPower'], data.power);
+                    updateRollingSensorData(charts['graphTemp'], data.temperature);
+                    
+                    console.log('Charts updated with new data');
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
     </script>
 </body>
 </html>
