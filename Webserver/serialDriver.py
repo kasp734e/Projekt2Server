@@ -103,8 +103,12 @@ class SerialDriver:
                 data = new_data  # Keep the latest response
             time.sleep(0.1)  # Short pause between reads
         
-        # Convert to integer or return 0
+        # Convert to float instead of integer
         try:
-            return int(data.strip())
+            value = float(data.strip())
+            # Optionally keep as int if it's a whole number
+            if value.is_integer():
+                return int(value)
+            return value
         except:
             return 0
