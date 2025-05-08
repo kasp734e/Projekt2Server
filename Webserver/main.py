@@ -1,7 +1,10 @@
+import datetime
 import dataObject
 from flask import Flask, jsonify, render_template
 import serialDriver
 import time
+import json
+
 
 power = dataObject.powerPrice()
 
@@ -12,6 +15,14 @@ arduinoData = {
     'power': 0,
     'temperature': 0
 }
+
+def saveArduinoDataToDisk():
+    dataToSave = arduinoData.copy()
+    dataToSave["time"] = datetime.datetime.now().isoformat()
+    
+    with open("data.json", "a") as file:
+        file.write("\n \n")
+        file.write(json.dumps(dataToSave, indent=4))
 
 def getDataFromArduino():
     s = serialDriver.SerialDriver(baudrate=9600, timeout=1, port="/dev/ttyACM0")
@@ -57,13 +68,13 @@ app = Flask(__name__)
 def solcelleApp(): 
     # Denne funktion kører når siden bliver loaded. 
     # Hvad denne funktion returnerer er det der bliver sendt til klienten (browseren)
-    power_data = power.getList()
     return render_template('index.html')
 
 @app.route("/api/update")
 def updateData():
     global arduinoData
     arduinoData = getDataFromArduino()
+    saveArduinoDataToDisk()
     return jsonify({"status": "updated"})
 
 @app.route("/api/data")

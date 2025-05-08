@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <button class="update-button" onclick="updateArduinoData()">Update Charts</button>
+    <button class="update-button" onclick="updateCharts()">Update Charts</button>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -206,8 +206,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("Data updated:", data);
-                    // Now get the new data and update the charts
-                    updateCharts();
+                    //updateCharts();
                 })
                 .catch(error => console.error('Error updating data:', error));
         }
