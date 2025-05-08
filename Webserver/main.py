@@ -28,33 +28,27 @@ def getDataFromArduino():
     s = serialDriver.SerialDriver(baudrate=9600, timeout=1, port="/dev/ttyACM0")
     if s.connect():
         s.writeData("u")
-        time.sleep(0.5)
-        uvValue = s.readData() or 0
+        uvValue = s.readWithTimeout(1.0)
 
         s.writeData("a")
-        time.sleep(0.5)
-        airValue = s.readData() or 0
+        airValue = s.readWithTimeout(1.0)
 
         s.writeData("p")
-        time.sleep(0.5)
-        powerValue = s.readData() or 0
+        powerValue = s.readWithTimeout(1.0)
 
         s.writeData("t")
-        time.sleep(0.5)
-        tempValue = s.readData() or 0
+        tempValue = s.readWithTimeout(1.0)
 
-        powerList = power.getList()
         s.disconnect()
 
         return {
-            'powerPrice': powerList,
+            'powerPrice': power.getList(),
             'uv': uvValue,
             'airQuality': airValue,
             'power': powerValue,
             'temperature': tempValue
         }
     else:
-        
         return {
             'powerPrice': power.getList(),
             'uv': 0,

@@ -81,3 +81,30 @@ class SerialDriver:
             print("\nStopping serial monitor.")
         finally:
             self.disconnect()
+    
+    def readWithTimeout(self, duration=1.0):
+        """Read data from serial port for a specified duration and return as integer.
+        
+        Args:
+            duration (float): Time in seconds to wait for data
+            
+        Returns:
+            int: The parsed integer value from serial, or 0 if invalid/empty
+        """
+        if not self.is_connected or not self.ser:
+            return 0
+            
+        start_time = time.time()
+        data = ""
+        
+        while (time.time() - start_time) < duration:
+            new_data = self.readData()
+            if new_data:
+                data = new_data  # Keep the latest response
+            time.sleep(0.1)  # Short pause between reads
+        
+        # Convert to integer or return 0
+        try:
+            return int(data.strip())
+        except:
+            return 0
