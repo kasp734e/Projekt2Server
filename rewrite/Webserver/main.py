@@ -54,7 +54,6 @@ def changeUpdateTime():
                 return jsonify({"error": "Update time must be greater than 0"}), 400
 
             updateMins = newTime
-            updateEvent.set()  # Signal the thread to immediately adjust the interval
             print(f'New update time is: {updateMins} minutes')
             return jsonify({"status": "success", "newUpdateTime": updateMins})
         except ValueError:
@@ -102,8 +101,7 @@ def backgroundUpdateData():
         except Exception as error:
             print(f"Error in backgroundUpdateData: {error}")
         
-        updateEvent.wait(timeout=updateMins * 60)
-        updateEvent.clear()
+        time.sleep(updateMins * 60)
 
 # Denne kode gør sådan at serveren kan tilgås på netværket med maskinenes ip efterfulgt af porten 8080
 if __name__ == "__main__":
