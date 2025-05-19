@@ -8,9 +8,11 @@ import threading
 arduinoData = {
     'time': None,
     'powerPrice': [],
+    'uv': 0,
     'airQuality': 0,
     'power': 0,
-    'airTemp': 0
+    'airTemp': 0,
+    'touchTemp': 0
 }
 dataList = []
 
@@ -70,9 +72,11 @@ def getData():
                 result.insert(0, {
                     'time': None,
                     'powerPrice': [],
+                    'uv': 0,
                     'airQuality': 0,
                     'power': 0,
-                    'airTemp': 0
+                    'airTemp': 0,
+                    'touchTemp': 0
                 })
             return jsonify(result)
     except (FileNotFoundError, json.JSONDecodeError):
@@ -80,9 +84,11 @@ def getData():
         return jsonify([{
             'time': None,
             'powerPrice': [],
+            'uv': 0,
             'airQuality': 0,
             'power': 0,
-            'airTemp': 0
+            'airTemp': 0,
+            'touchTemp': 0
         } for _ in range(24)])
 
 def backgroundUpdateData():
@@ -98,7 +104,7 @@ def backgroundUpdateData():
 
 # Denne kode gør sådan at serveren kan tilgås på netværket med maskinenes ip efterfulgt af porten 8080
 if __name__ == "__main__":
-    updateMins = 0.3333
+    updateMins = 10
     threading.Thread(target=backgroundUpdateData, daemon=True).start()
     app.run(host='0.0.0.0', port=8080, debug=False)
 

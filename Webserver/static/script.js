@@ -48,16 +48,19 @@ function createChartData(labels, data) {
 /** Iterates over the graphs in the graphs array, gets the HTML element with the corresponding id, and inits the chart */
 function initCharts() {
     const graphs = ['graphPower',
+                    /* 'graphUV', */
                     'graphAirQuality',
                     'graphPowerPrice',
-                    'graphAirTemp'
-                    ];
+                    'graphAirTemp',
+                    /* 'graphTouchTemp' */];
 
     const datasets = [
         createChartData(rollingLabels, initialData.slice()),
+        /* createChartData(rollingLabels, initialData.slice()), */
         createChartData(rollingLabels, initialData.slice()),
         powerData,
-        createChartData(rollingLabels, initialData.slice())
+        createChartData(rollingLabels, initialData.slice()),
+        /* createChartData(rollingLabels, initialData.slice())  */
     ]; 
 
     const defaultConfig = {
@@ -67,9 +70,11 @@ function initCharts() {
 
      const configs = [
          {type: 'line', options: defaultConfig},
+         /* {type: 'bar', options: defaultConfig}, */
          {type: 'line', options: defaultConfig},
          {type: 'bar', options:defaultConfig},
-         {type: 'line', options:defaultConfig}
+         {type: 'line', options:defaultConfig},
+         /* {type: 'line', options: defaultConfig}  */
     ];
 
     graphs.forEach((graph, index) => { // iterates over graphs, 
@@ -119,13 +124,17 @@ function updateCharts() {
             const latestData = dataArray[dataArray.length - 1];
             const recentData = dataArray; // The server already ensures it contains 24 items
 
+            /* const uvValues = recentData.map(item => item.uv || 0); */
             const airQualityValues = recentData.map(item => item.airQuality || 0);
             const powerValues = recentData.map(item => item.power || 0);
             const airTemperatureValues = recentData.map(item => item.airTemp || 0); 
+            /* const touchTemperatureValues = recentData.map(item => item.touchTemp || 0);  */
 
+            /* updateChartData(charts['graphUV'], uvValues); */
             updateChartData(charts['graphAirQuality'], airQualityValues);
             updateChartData(charts['graphPower'], powerValues);
             updateChartData(charts['graphAirTemp'], airTemperatureValues);
+            /* updateChartData(charts['graphTouchTemp'], touchTemperatureValues);  */
             updateChartData(charts['graphPowerPrice'], latestData.powerPrice);
  
             console.log('Charts updated');

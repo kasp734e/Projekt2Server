@@ -1,9 +1,6 @@
 import serial
 import time
 
-#usedPort = "/dev/tty.usbmodem11301" # macbook
-#usedport = "/dev/ttyACM0" # raspberry pi
-
 class SerialDriver:
     """A serial port driver for communicating with devices"""
     
