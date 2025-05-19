@@ -4,6 +4,9 @@ import datetime
 import elPris
 import time
 
+#usedPort = "/dev/tty.usbmodem11301" # macbook
+usedport = "/dev/ttyACM0" # raspberry pi
+
 def saveArduinoDataToDisk(dataList):
     existingData = []
     try:
@@ -26,7 +29,7 @@ def saveArduinoDataToDisk(dataList):
         json.dump(existingData, file, indent=4, ensure_ascii=False)
 
 def getDataFromArduino():
-    s = serialDriver.SerialDriver(baudrate=9600, timeout=2, port="/dev/tty.usbmodem1101")
+    s = serialDriver.SerialDriver(baudrate=9600, timeout=2, port=usedPort)
     if s.connect():
        # s.writeData("u")
        # uvValue = s.readWithTimeout(1.0)
