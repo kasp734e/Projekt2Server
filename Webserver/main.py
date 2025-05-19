@@ -8,11 +8,9 @@ import threading
 arduinoData = {
     'time': None,
     'powerPrice': [],
-    'uv': 0,
     'airQuality': 0,
     'power': 0,
-    'airTemp': 0,
-    'touchTemp': 0
+    'airTemp': 0
 }
 dataList = []
 
@@ -72,11 +70,9 @@ def getData():
                 result.insert(0, {
                     'time': None,
                     'powerPrice': [],
-                    'uv': 0,
                     'airQuality': 0,
                     'power': 0,
-                    'airTemp': 0,
-                    'touchTemp': 0
+                    'airTemp': 0
                 })
             return jsonify(result)
     except (FileNotFoundError, json.JSONDecodeError):
@@ -84,11 +80,9 @@ def getData():
         return jsonify([{
             'time': None,
             'powerPrice': [],
-            'uv': 0,
             'airQuality': 0,
             'power': 0,
-            'airTemp': 0,
-            'touchTemp': 0
+            'airTemp': 0
         } for _ in range(24)])
 
 def backgroundUpdateData():
