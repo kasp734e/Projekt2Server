@@ -143,7 +143,7 @@ function updateCharts() {
 }
 
 /** Takes a new update time in minutes and sends it to the server */
-function changeUpdateTime(newUpdateTime) {
+/* function changeUpdateTime(newUpdateTime) {
     fetch('/api/changeUpdateTime', {
         method: 'POST',
         headers: {
@@ -158,7 +158,7 @@ function changeUpdateTime(newUpdateTime) {
     .catch(error => {
         console.error('Error sending time to server:', error);
     });
-}
+} */
 
 /** Gets the whole JSON file from the server and makes the user download it */
 function downloadJSON() {

@@ -41,7 +41,7 @@ def getJSON():
         data = json.load(file)
         return jsonify(data)
 
-@app.route("/api/changeUpdateTime", methods=['POST'])
+""" @app.route("/api/changeUpdateTime", methods=['POST'])
 def changeUpdateTime():
     global updateMins
     newData = request.json
@@ -59,7 +59,7 @@ def changeUpdateTime():
             return jsonify({"error": "Invalid value for 'value'. Must be a number."}), 400
     else:
         return jsonify({"error": "Invalid input"}), 400
-
+ """
 
 @app.route("/api/data")
 def getData():
