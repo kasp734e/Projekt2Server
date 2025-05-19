@@ -1,19 +1,19 @@
 import json
 import urllib.request
+import datetime
 
 def fetchPrice(date):
-    """Benytter sig af elprisenligenu.dk til at skaffen dagens elpris, retunerer et stort JSON objekt"""
-    monthStr = f"{date.month:02d}" # Det er nødvendigt at runde dag og måned af fordi ellers bliver apien sur.
+    """Returns a list of the power price for the current day in DKK"""
+    monthStr = f"{date.month:02d}"  # Format month and day to ensure API compatibility
     dayStr = f"{date.day:02d}"
-    formatted_date = f"{date.year}/{monthStr}-{dayStr}" # Formaterer en string til formatet APIen kræver
-    url = f"https://www.elprisenligenu.dk/api/v1/prices/{formatted_date}_DK2.json" # Definerer url til APIen
+    formattedDate = f"{date.year}/{monthStr}-{dayStr}"  # Format the date string for the API
+    url = f"https://www.elprisenligenu.dk/api/v1/prices/{formattedDate}_DK2.json"  # Define the API URL
     req = urllib.request.Request(
         url,
-        data=None,
-        headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-        }
+        headers={'User-Agent': 'Mozilla/5.0'}
     )
-    response = urllib.request.urlopen(req) # Sender en request til url og skaffer JSON
-    data = json.loads(response.read().decode()) # Loader JSON fra APIen til en python variabel så vi kan arbejde med det
-    return data
+    with urllib.request.urlopen(req) as response:
+        priceJsonPy = json.load(response)  # Load JSON from the API into a Python variable
+
+    # Get and round the power prices
+    return [round(d["DKK_per_kWh"], 2) for d in priceJsonPy if "DKK_per_kWh" in d]
