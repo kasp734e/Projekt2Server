@@ -5,7 +5,7 @@ import elPris
 import time
 
 #usedPort = "/dev/tty.usbmodem11301" # macbook
-usedport = "/dev/ttyACM0" # raspberry pi
+usedPort = "/dev/ttyACM0" # raspberry pi
 
 def saveArduinoDataToDisk(dataList):
     existingData = []
